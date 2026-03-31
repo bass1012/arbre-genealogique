@@ -16,7 +16,7 @@ const createAdmin = async () => {
 
     // Données admin
     const adminEmail = 'bassirou2010@gmail.com';
-    const adminPassword = 'Keep0ut@2026!';
+    const adminPassword = 'Remples@1210';
     const adminNom = 'Admin';
     const adminPrenom = 'Super';
     const familleNom = 'Administration';

@@ -49,7 +49,8 @@ export const protect = async (
 
       // Attacher l'utilisateur et la famille à la requête
       req.user = user;
-      req.familleId = user.familleId.toString();
+      // Utiliser familleId du token si disponible, sinon celle de l'utilisateur
+      req.familleId = decoded.familleId || user.familleId?.toString();
 
       next();
     } catch (error) {
@@ -91,7 +92,7 @@ export const authorize = (...roles: string[]) => {
 };
 
 // Générer un token JWT
-export const generateToken = (id: string): string => {
+export const generateToken = (id: string, familleId?: string): string => {
   const jwtSecret = process.env.JWT_SECRET;
   const jwtExpiresIn = (process.env.JWT_EXPIRES_IN ||
     "30d") as jwt.SignOptions["expiresIn"];
@@ -100,7 +101,12 @@ export const generateToken = (id: string): string => {
     throw new Error("Configuration serveur invalide: JWT_SECRET manquant");
   }
 
-  return jwt.sign({ id }, jwtSecret, {
+  const payload: any = { id };
+  if (familleId) {
+    payload.familleId = familleId;
+  }
+
+  return jwt.sign(payload, jwtSecret, {
     expiresIn: jwtExpiresIn,
   });
 };

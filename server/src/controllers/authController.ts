@@ -50,7 +50,7 @@ export const register = async (req: Request, res: Response) => {
     await Famille.findByIdAndUpdate(famille._id, { createdBy: user._id });
 
     // Générer le token JWT
-    const token = generateToken(user._id.toString());
+    const token = generateToken(user._id.toString(), famille._id.toString());
 
     res.status(201).json({
       success: true,
@@ -120,7 +120,7 @@ export const login = async (req: Request, res: Response) => {
     const famille = await Famille.findById(user.familleId);
 
     // Générer le token
-    const token = generateToken(user._id.toString());
+    const token = generateToken(user._id.toString(), user.familleId?.toString());
 
     res.status(200).json({
       success: true,
