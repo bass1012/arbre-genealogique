@@ -21,7 +21,7 @@ class UserModel {
     this.db = db;
   }
 
-  async create(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
+  async create(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User | null> {
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     const [result] = await this.db.execute(
       `INSERT INTO users (email, password, nom, prenom, familleId, role) 

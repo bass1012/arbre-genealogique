@@ -33,7 +33,7 @@ class PersonneModel {
     this.db = db;
   }
 
-  async create(personneData: Omit<Personne, 'id' | 'createdAt' | 'updatedAt'>): Promise<Personne> {
+  async create(personneData: Omit<Personne, 'id' | 'createdAt' | 'updatedAt'>): Promise<Personne | null> {
     const [result] = await this.db.execute(
       `INSERT INTO personnes (
         nom, prenom, nomJeuneFille, surnoms, dateNaissance, lieuNaissance,
