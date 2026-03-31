@@ -17,11 +17,16 @@ dotenv.config();
 // Création de l'application Express
 const app: Application = express();
 
+// Configuration CORS flexible
+const corsOptions = {
+  origin: process.env.CLIENT_URL === '*' 
+    ? '*' 
+    : (process.env.CLIENT_URL || 'http://localhost:3000'),
+  credentials: process.env.CLIENT_URL !== '*'
+};
+
 // Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
-}));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(requestLogger);
