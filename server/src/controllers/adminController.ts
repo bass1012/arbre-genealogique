@@ -146,7 +146,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
     if (email) user.email = email;
     if (nom) user.nom = nom;
     if (prenom) user.prenom = prenom;
-    if (role) user.role = role as 'admin' | 'membre' | 'lecteur';
+    if (role) user.role = role as 'superadmin' | 'gestionnaire' | 'membre' | 'lecteur';
     if (familleId) user.familleId = familleId;
 
     await user.save();

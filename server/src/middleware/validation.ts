@@ -4,19 +4,21 @@ import { Request, Response, NextFunction } from 'express';
 export const validatePersonne = [
   body('nom').trim().notEmpty().withMessage('Le nom est requis'),
   body('prenom').trim().notEmpty().withMessage('Le prénom est requis'),
-  body('dateNaissance').optional().isISO8601().withMessage('Date de naissance invalide'),
-  body('dateDeces').optional().isISO8601().withMessage('Date de décès invalide'),
-  body('genre').optional().isIn(['homme', 'femme', 'autre']).withMessage('Genre invalide'),
-  body('email').optional().isEmail().withMessage('Email invalide'),
-  
-  body('dateDeces').custom((dateDeces, { req }) => {
-    if (dateDeces && req.body.dateNaissance) {
-      const naissance = new Date(req.body.dateNaissance);
-      const deces = new Date(dateDeces);
-      if (deces <= naissance) {
-        throw new Error('La date de décès doit être postérieure à la date de naissance');
-      }
-    }
+  body('dateNaissance').custom((value) => {
+    if (!value) return true;
+    if (!/^\d{4}-\d{2}-\d{2}/.test(value)) throw new Error('Date de naissance invalide');
+    return true;
+  }),
+  // dateDeces - pas de validation requise, accepte null
+  body('dateDeces').optional(),
+  body('genre').custom((value) => {
+    if (!value) return true;
+    if (!['homme', 'femme', 'autre'].includes(value)) throw new Error('Genre invalide');
+    return true;
+  }),
+  body('email').custom((value) => {
+    if (!value) return true;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) throw new Error('Email invalide');
     return true;
   }),
   

@@ -8,7 +8,7 @@ export interface IUser extends Document {
   nom: string;
   prenom: string;
   familleId: mongoose.Types.ObjectId;
-  role: 'admin' | 'membre' | 'lecteur';
+  role: 'superadmin' | 'gestionnaire' | 'membre' | 'lecteur';
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -47,9 +47,9 @@ const UserSchema: Schema = new Schema(
     },
     role: {
       type: String,
-      enum: ['admin', 'membre', 'lecteur'],
+      enum: ['superadmin', 'gestionnaire', 'membre', 'lecteur'],
       default: 'membre',
-      description: 'admin: tous droits | membre: lecture+écriture | lecteur: lecture seule'
+      description: 'superadmin: admin global | gestionnaire: admin famille | membre: lecture+écriture | lecteur: lecture seule'
     }
   },
   {

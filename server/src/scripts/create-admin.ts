@@ -62,25 +62,25 @@ const createAdmin = async () => {
     });
     console.log('✅ Famille créée:', famille.nom);
 
-    // Créer l'utilisateur admin
-    console.log('📝 Création de l\'utilisateur admin...');
+    // Créer l'utilisateur superadmin
+    console.log('📝 Création de l\'utilisateur superadmin...');
     const admin = await User.create({
       email,
       password,
       nom,
       prenom,
-      role: 'admin',
+      role: 'superadmin',
       familleId: famille._id
     });
 
     // Mettre à jour la famille avec le créateur
     await Famille.findByIdAndUpdate(famille._id, { createdBy: admin._id });
 
-    console.log('\n✅ Administrateur créé avec succès!\n');
+    console.log('\n✅ Super administrateur créé avec succès!\n');
     console.log('📧 Email:', admin.email);
     console.log('👤 Nom:', admin.prenom, admin.nom);
     console.log('🏠 Famille:', famille.nom);
-    console.log('🔐 Rôle: admin');
+    console.log('🔐 Rôle: superadmin');
     console.log('\n⚠️  Connectez-vous maintenant à l\'application avec ces identifiants.');
 
     rl.close();

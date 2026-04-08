@@ -100,7 +100,7 @@ export const supprimerDocument = async (
         await deleteImage(document.urlPublicId);
       } catch (error) {
         console.error(
-          "Erreur lors de la suppression du document sur Cloudinary:",
+          "Erreur lors de la suppression du document:",
           error,
         );
       }

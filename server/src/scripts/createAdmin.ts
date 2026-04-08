@@ -39,20 +39,20 @@ const createAdmin = async () => {
     });
     console.log(`✅ Famille créée: ${famille.nom} (ID: ${famille._id})\n`);
 
-    console.log('👤 Création de l\'utilisateur administrateur...');
+    console.log('👤 Création de l\'utilisateur super administrateur...');
     const admin = await User.create({
       email: adminEmail,
       password: adminPassword,
       nom: adminNom,
       prenom: adminPrenom,
       familleId: famille._id,
-      role: 'admin'
+      role: 'superadmin'
     });
 
     // Mettre à jour la famille avec l'ID du créateur
     await Famille.findByIdAndUpdate(famille._id, { createdBy: admin._id });
 
-    console.log('✅ Administrateur créé avec succès!\n');
+    console.log('✅ Super administrateur créé avec succès!\n');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('📋 INFORMATIONS DE CONNEXION');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

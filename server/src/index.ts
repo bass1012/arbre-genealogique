@@ -9,6 +9,7 @@ import relationRoutes from './routes/relationRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import documentRoutes from './routes/documentRoutes';
 import adminRoutes from './routes/adminRoutes';
+import invitationRoutes from './routes/invitationRoutes';
 import { requestLogger } from './middleware/logger';
 
 // Chargement des variables d'environnement
@@ -17,11 +18,19 @@ dotenv.config();
 // Création de l'application Express
 const app: Application = express();
 
-// Configuration CORS flexible
+// Configuration CORS flexible - supporte plusieurs origines séparées par des virgules
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:3000').split(',').map(o => o.trim());
 const corsOptions = {
   origin: process.env.CLIENT_URL === '*' 
     ? '*' 
-    : (process.env.CLIENT_URL || 'http://localhost:3000'),
+    : (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+        // Permettre les requêtes sans origin (apps mobiles, curl, etc.)
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(null, false);
+        }
+      },
   credentials: process.env.CLIENT_URL !== '*'
 };
 
@@ -31,6 +40,10 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(requestLogger);
 
+// Servir les fichiers uploadés
+const uploadsPath = process.env.UPLOADS_DIR || path.join(__dirname, '../uploads');
+app.use('/uploads', express.static(uploadsPath));
+
 // Routes de l'API
 app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'OK', message: 'API is running' });
@@ -38,6 +51,11 @@ app.get('/api/health', (req: Request, res: Response) => {
 
 // Routes d'authentification (publiques)
 app.use('/api/auth', authRoutes);
+
+// Route famille (protégée)
+import { updateFamille } from './controllers/authController';
+import { protect } from './middleware/auth';
+app.put('/api/famille', protect, updateFamille);
 
 // Routes des personnes et relations (protégées)
 app.use('/api/personnes', personneRoutes);
@@ -47,6 +65,9 @@ app.use('/api/documents', documentRoutes);
 
 // Routes admin (protégées - admin seulement)
 app.use('/api/admin', adminRoutes);
+
+// Routes invitations (mixte public/protégé)
+app.use('/api/invitations', invitationRoutes);
 
 // Gestion des erreurs 404
 app.use((req: Request, res: Response) => {

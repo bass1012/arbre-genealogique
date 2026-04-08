@@ -9,7 +9,7 @@ interface User {
   nom: string;
   prenom: string;
   familleId: number;
-  role: 'admin' | 'membre' | 'lecteur';
+  role: 'superadmin' | 'gestionnaire' | 'membre' | 'lecteur';
   createdAt: Date;
   updatedAt: Date;
 }

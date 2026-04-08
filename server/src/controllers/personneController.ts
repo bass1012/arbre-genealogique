@@ -78,7 +78,7 @@ export const createPersonne = async (
         const uploadResult = await uploadBase64Image(req.body.photo);
         photoUrl = uploadResult.url;
         photoPublicId = uploadResult.publicId;
-        console.log("Photo uploadée sur Cloudinary:", photoUrl);
+        console.log("Photo uploadée:", photoUrl);
       } catch (uploadError) {
         console.error("Erreur lors de l'upload de la photo:", uploadError);
       }
@@ -147,7 +147,19 @@ export const updatePersonne = async (
     let photoUrl = req.body.photo;
     let photoPublicId = personneExistante.photoPublicId;
 
-    if (req.body.photo && req.body.photo.startsWith("data:image")) {
+    // Gestion de la suppression explicite de la photo
+    if (req.body.photo === null || req.body.photo === '') {
+      // Supprimer l'ancienne photo si elle existe
+      if (personneExistante.photoPublicId) {
+        try {
+          await deleteImage(personneExistante.photoPublicId);
+        } catch (deleteError) {
+          console.error("Erreur lors de la suppression de l'ancienne photo:", deleteError);
+        }
+      }
+      photoUrl = null;
+      photoPublicId = undefined;
+    } else if (req.body.photo && req.body.photo.startsWith("data:image")) {
       try {
         if (personneExistante.photoPublicId) {
           await deleteImage(personneExistante.photoPublicId);
@@ -224,7 +236,7 @@ export const deletePersonne = async (
         await deleteImage(personne.photoPublicId);
       } catch (error) {
         console.error(
-          "Erreur lors de la suppression de la photo sur Cloudinary:",
+          "Erreur lors de la suppression de la photo:",
           error,
         );
       }

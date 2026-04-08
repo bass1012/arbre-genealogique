@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="30" fill="#2e7d32"/>
+  <!-- Tree trunk -->
+  <rect x="28" y="40" width="8" height="16" fill="#795548"/>
+  <!-- Tree crown (3 circles representing family tree) -->
+  <circle cx="32" cy="24" r="12" fill="#4caf50"/>
+  <circle cx="22" cy="32" r="8" fill="#66bb6a"/>
+  <circle cx="42" cy="32" r="8" fill="#66bb6a"/>
+  <!-- Small dots representing family members -->
+  <circle cx="32" cy="20" r="3" fill="white"/>
+  <circle cx="26" cy="28" r="2" fill="white"/>
+  <circle cx="38" cy="28" r="2" fill="white"/>
+  <circle cx="20" cy="34" r="2" fill="white"/>
+  <circle cx="44" cy="34" r="2" fill="white"/>
+</svg>

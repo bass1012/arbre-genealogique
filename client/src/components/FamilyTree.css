@@ -1,0 +1,1208 @@
+/* FamilyTree.css - Design Moderne */
+
+/* Container principal */
+.family-tree-container {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 150px);
+  min-height: 600px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.03);
+  border: 1px solid #e2e8f0;
+}
+
+/* Pattern décoratif arbre */
+.family-tree-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23818cf8' stroke-width='1.5'%3E%3Cpath d='M100 200 L100 140'/%3E%3Cpath d='M100 160 L60 120'/%3E%3Cpath d='M100 160 L140 120'/%3E%3Cpath d='M60 120 L40 80'/%3E%3Cpath d='M60 120 L80 80'/%3E%3Cpath d='M140 120 L120 80'/%3E%3Cpath d='M140 120 L160 80'/%3E%3Cpath d='M40 80 L30 40'/%3E%3Cpath d='M40 80 L50 40'/%3E%3Cpath d='M80 80 L70 40'/%3E%3Cpath d='M80 80 L90 40'/%3E%3Cpath d='M120 80 L110 40'/%3E%3Cpath d='M120 80 L130 40'/%3E%3Cpath d='M160 80 L150 40'/%3E%3Cpath d='M160 80 L170 40'/%3E%3Ccircle cx='100' cy='170' r='8' fill='%23818cf8'/%3E%3Ccircle cx='60' cy='120' r='6' fill='%23818cf8'/%3E%3Ccircle cx='140' cy='120' r='6' fill='%23818cf8'/%3E%3Ccircle cx='40' cy='80' r='5' fill='%23818cf8'/%3E%3Ccircle cx='80' cy='80' r='5' fill='%23818cf8'/%3E%3Ccircle cx='120' cy='80' r='5' fill='%23818cf8'/%3E%3Ccircle cx='160' cy='80' r='5' fill='%23818cf8'/%3E%3Ccircle cx='30' cy='40' r='4' fill='%23818cf8'/%3E%3Ccircle cx='50' cy='40' r='4' fill='%23818cf8'/%3E%3Ccircle cx='70' cy='40' r='4' fill='%23818cf8'/%3E%3Ccircle cx='90' cy='40' r='4' fill='%23818cf8'/%3E%3Ccircle cx='110' cy='40' r='4' fill='%23818cf8'/%3E%3Ccircle cx='130' cy='40' r='4' fill='%23818cf8'/%3E%3Ccircle cx='150' cy='40' r='4' fill='%23818cf8'/%3E%3Ccircle cx='170' cy='40' r='4' fill='%23818cf8'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  z-index: 0;
+}
+
+.family-tree-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100vh;
+  z-index: 9999;
+  border-radius: 0;
+  border: none;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+/* Zone de l'arbre avec pan/drag */
+.tree-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+  z-index: 1;
+}
+
+.tree-viewport:active {
+  cursor: grabbing;
+}
+
+.tree-viewport.dragging {
+  cursor: grabbing;
+}
+
+.tree-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem;
+  min-width: max-content;
+  transform-origin: center center;
+  transition: transform 0.1s ease-out;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(25, 118, 210, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(25, 118, 210, 0.5);
+  }
+}
+
+@keyframes drawLine {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Carte de personne */
+.person-card {
+  position: relative;
+  width: 180px;
+  min-height: 140px;
+  border-radius: 18px;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  background: white;
+}
+
+.person-card:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  z-index: 10;
+}
+
+.person-card--root {
+  width: 200px;
+  min-height: 160px;
+  border: 3px solid #6366f1;
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+}
+
+.person-card--male {
+  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+  border: 2px solid #60a5fa;
+  box-shadow: 0 4px 20px rgba(96, 165, 250, 0.15);
+}
+
+.person-card--female {
+  background: linear-gradient(135deg, #ffffff 0%, #fdf2f8 100%);
+  border: 2px solid #f472b6;
+  box-shadow: 0 4px 20px rgba(244, 114, 182, 0.15);
+}
+
+.person-card--spouse {
+  border-style: dashed;
+}
+
+.person-card--deceased {
+  position: relative;
+}
+
+.person-card--deceased::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(0,0,0,0.03) 100%);
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+.person-card--clickable {
+  cursor: pointer;
+}
+
+.person-card--highlighted {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+}
+
+/* Avatar */
+.person-avatar {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 22px;
+  color: #fff;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.person-avatar--male {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+}
+
+.person-avatar--female {
+  background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+}
+
+.person-avatar--other {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+}
+
+.person-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.person-avatar--root {
+  width: 72px;
+  height: 72px;
+  border: 3px solid white;
+}
+
+/* Badge étoile pour root */
+.person-star-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.4);
+  z-index: 10;
+}
+
+/* Badge décédé */
+.person-deceased-badge {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  border: 2px solid white;
+  z-index: 5;
+}
+
+/* Informations personne */
+.person-name {
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.3;
+  color: #212121;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.person-name--root {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.gender-icon {
+  font-size: 14px;
+}
+
+.gender-icon--male {
+  color: #3b82f6;
+}
+
+.gender-icon--female {
+  color: #ec4899;
+}
+
+.person-dates {
+  font-size: 11px;
+  color: #616161;
+  text-align: center;
+  background: rgba(0,0,0,0.05);
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-bottom: 4px;
+}
+
+.person-age {
+  font-size: 10px;
+  color: #9e9e9e;
+  font-style: italic;
+}
+
+/* Parents externes (hors famille) */
+.person-external-parents {
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 6px;
+  border: 1px dashed #86efac;
+  font-size: 9px;
+}
+
+.external-parent {
+  color: #166534;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.external-parent-label {
+  font-weight: 600;
+  color: #15803d;
+}
+
+/* Bouton expansion */
+.expand-button {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  color: white;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+  z-index: 20;
+}
+
+.expand-button:hover {
+  background: linear-gradient(135deg, #43a047 0%, #4caf50 100%);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+/* Tooltip - toujours visible au survol */
+.person-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(33, 33, 33, 0.95);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+
+.person-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(33, 33, 33, 0.95);
+}
+
+.person-card:hover .person-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.tooltip-row:last-child {
+  margin-bottom: 0;
+}
+
+.tooltip-label {
+  color: #9e9e9e;
+}
+
+.tooltip-value {
+  font-weight: 600;
+}
+
+/* Lignes de connexion SVG */
+.tree-connectors {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.connector-line {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.connector-line--parent {
+  stroke: #818cf8;
+}
+
+.connector-line--spouse {
+  stroke: #ec4899;
+  stroke-dasharray: 8, 4;
+}
+
+.connector-line--animated {
+  stroke-dasharray: 100;
+  animation: drawLine 0.6s ease-out forwards;
+}
+
+.connector-animated {
+  animation: pulseConnector 2s ease-in-out infinite;
+}
+
+@keyframes pulseConnector {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Contrôles flottants */
+.tree-controls {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.control-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: white;
+  color: #6366f1;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-button:hover {
+  background: #eef2ff;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.control-button:active {
+  background: #e0e7ff;
+}
+
+.control-button--active {
+  background: #6366f1;
+  color: white;
+}
+
+.zoom-display {
+  background: white;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6366f1;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+/* Minimap */
+.tree-minimap {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  width: 200px;
+  height: 150px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  overflow: hidden;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.minimap-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.minimap-viewport {
+  position: absolute;
+  border: 2px solid #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 4px;
+  cursor: move;
+}
+
+.minimap-person {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.minimap-person--male {
+  background: #3b82f6;
+}
+
+.minimap-person--female {
+  background: #ec4899;
+}
+
+.minimap-person--root {
+  border: 2px solid #ffd700;
+}
+
+/* Barre d'outils supérieure */
+.tree-toolbar {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.toolbar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f5f5;
+  border-radius: 12px;
+  padding: 8px 12px;
+  min-width: 200px;
+}
+
+.toolbar-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  width: 100%;
+}
+
+.toolbar-search input::placeholder {
+  color: #9e9e9e;
+}
+
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: none;
+  background: #f5f5f5;
+  color: #424242;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.toolbar-button:hover {
+  background: #e0e0e0;
+}
+
+.toolbar-button--primary {
+  background: #6366f1;
+  color: white;
+}
+
+.toolbar-button--primary:hover {
+  background: #4f46e5;
+}
+
+/* Légende */
+.tree-legend {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  padding: 12px 24px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  font-size: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.legend-dot--root {
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  border: 2px solid #fbbf24;
+}
+
+.legend-dot--male {
+  background: #3b82f6;
+}
+
+.legend-dot--female {
+  background: #ec4899;
+}
+
+.legend-dot--spouse {
+  background: white;
+  border: 2px dashed #f472b6;
+}
+
+/* Sections de génération */
+.generation-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.generation-label {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.generation-label--ancestors {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #2e7d32;
+}
+
+.generation-label--current {
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  color: #4f46e5;
+}
+
+.generation-label--descendants {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  color: #e65100;
+}
+
+/* Couple container */
+.couple-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+}
+
+.spouse-connector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ec4899;
+  font-size: 18px;
+}
+
+.spouse-line {
+  width: 40px;
+  height: 4px;
+  background: linear-gradient(90deg, #ec4899 0%, #f472b6 50%, #ec4899 100%);
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+}
+
+/* Badges pour distinguer les parents biologiques */
+.biological-parent-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+}
+
+.other-spouse-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #9e9e9e 0%, #bdbdbd 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Enfants container */
+.children-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  position: relative;
+}
+
+.children-row {
+  display: flex;
+  gap: 3rem;
+  justify-content: center;
+  position: relative;
+}
+
+/* Style pour la ligne horizontale avec double ligne */
+.horizontal-connector {
+  position: relative;
+}
+
+/* Seconde ligne parallèle */
+.horizontal-connector::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: inherit;
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+.child-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.child-number {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 3px 10px rgba(99, 102, 241, 0.4);
+  z-index: 10;
+  border: 2px solid white;
+}
+
+/* Badge groupe mère */
+.mother-group-badge {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.3px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+  margin-bottom: 10px;
+  backdrop-filter: blur(4px);
+}
+
+.mother-group-badge--1 {
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+}
+
+.mother-group-badge--2 {
+  background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%);
+}
+
+.mother-group-badge--3 {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+/* Frères/Soeurs */
+.siblings-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 18px;
+  border: 2px dashed #cbd5e1;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+.siblings-label {
+  padding: 6px 14px;
+  background: white;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6366f1;
+  border: 1px solid #e0e7ff;
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.1);
+}
+
+.sibling-divider {
+  font-size: 20px;
+  color: #94a3b8;
+}
+
+/* Message vide */
+.empty-tree-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.empty-tree-icon {
+  font-size: 64px;
+  margin-bottom: 1.5rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.empty-tree-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #424242;
+  margin-bottom: 8px;
+}
+
+.empty-tree-subtitle {
+  font-size: 14px;
+  color: #9e9e9e;
+}
+
+/* Navigation directionnelle */
+.tree-navigation {
+  position: absolute;
+  bottom: 24px;
+  right: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  backdrop-filter: blur(10px);
+}
+
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: white;
+  color: #6366f1;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.nav-button:hover {
+  background: #eef2ff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.nav-button:active {
+  background: #e0e7ff;
+}
+
+.nav-center {
+  background: #6366f1;
+  color: white;
+  border-radius: 50%;
+}
+
+.nav-center:hover {
+  background: #4f46e5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .family-tree-container {
+    height: calc(100vh - 180px);
+    min-height: 400px;
+    border-radius: 12px;
+  }
+
+  .tree-toolbar {
+    position: absolute;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: calc(100% - 24px);
+    left: 12px;
+    transform: none;
+    gap: 6px;
+    padding: 8px;
+    z-index: 100;
+  }
+  
+  .toolbar-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  .tree-legend {
+    position: absolute;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: calc(100% - 24px);
+    left: 12px;
+    transform: none;
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 10px;
+    bottom: 12px;
+    background: rgba(255,255,255,0.98);
+    border-radius: 12px;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  
+  .legend-item {
+    padding: 3px 6px;
+    gap: 4px;
+  }
+  
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .tree-content {
+    padding: 2rem 1.5rem 4rem 1.5rem;
+    gap: 1.5rem;
+  }
+  
+  .tree-minimap {
+    display: none;
+  }
+  
+  .person-card {
+    width: 140px;
+    min-height: 110px;
+    padding: 0.8rem;
+    border-radius: 14px;
+  }
+  
+  .person-card--root {
+    width: 160px;
+    min-height: 130px;
+  }
+  
+  .person-avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  
+  .person-avatar--root {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .person-name {
+    font-size: 12px;
+  }
+  
+  .person-name--root {
+    font-size: 14px;
+  }
+  
+  .person-dates {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+  
+  .person-age {
+    font-size: 9px;
+  }
+  
+  .expand-button {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    bottom: -12px;
+  }
+  
+  .person-star-badge {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+    top: -6px;
+    right: -6px;
+  }
+  
+  .person-deceased-badge {
+    width: 22px;
+    height: 22px;
+    font-size: 12px;
+  }
+  
+  .person-external-parents {
+    font-size: 8px;
+    padding: 3px 6px;
+  }
+  
+  /* Navigation panel mobile */
+  .tree-nav-panel {
+    bottom: auto;
+    top: 70px;
+    right: 12px;
+    flex-direction: row;
+    gap: 4px;
+    padding: 6px;
+  }
+  
+  .nav-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .family-tree-container {
+    height: calc(100vh - 200px);
+    min-height: 350px;
+    border-radius: 10px;
+  }
+  
+  .tree-toolbar {
+    top: 8px;
+    padding: 6px;
+  }
+  
+  .toolbar-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  
+  .tree-legend {
+    bottom: 8px;
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+  
+  .person-card {
+    width: 120px;
+    min-height: 100px;
+    padding: 0.6rem;
+    border-radius: 12px;
+  }
+  
+  .person-card--root {
+    width: 140px;
+    min-height: 115px;
+  }
+  
+  .person-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  
+  .person-avatar--root {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .person-name {
+    font-size: 11px;
+  }
+  
+  .person-name--root {
+    font-size: 13px;
+  }
+  
+  .person-dates {
+    font-size: 9px;
+  }
+  
+  .tree-content {
+    padding: 1.5rem 1rem 3.5rem 1rem;
+    gap: 1rem;
+  }
+  
+  .tree-legend {
+    bottom: 6px;
+    padding: 5px 8px;
+    font-size: 9px;
+    gap: 4px;
+  }
+  
+  .legend-item {
+    padding: 2px 4px;
+    gap: 3px;
+  }
+  
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .generation-row {
+    gap: 0.8rem;
+  }
+  
+  .family-group {
+    gap: 0.6rem;
+  }
+}

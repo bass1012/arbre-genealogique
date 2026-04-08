@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
   nom VARCHAR(255) NOT NULL,
   prenom VARCHAR(255) NOT NULL,
   familleId INT NOT NULL,
-  role ENUM('admin', 'membre', 'lecteur') DEFAULT 'membre',
+  role ENUM('superadmin', 'gestionnaire', 'membre', 'lecteur') DEFAULT 'membre',
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (familleId) REFERENCES familles(id) ON DELETE CASCADE

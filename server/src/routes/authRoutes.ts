@@ -6,6 +6,9 @@ import {
   login,
   getMe,
   inviteMember,
+  updateProfile,
+  changePassword,
+  updateFamille,
 } from "../controllers/authController";
 import { protect, authorize } from "../middleware/auth";
 import { createRateLimiter } from "../middleware/rateLimit";
@@ -75,16 +78,12 @@ const inviteValidation = [
 
 // Routes publiques
 router.post("/login", loginRateLimiter, loginValidation, login);
+router.post("/register", registerValidation, register);
 
-// Routes protégées (admin seulement pour register maintenant)
-router.post(
-  "/register",
-  protect,
-  authorize("admin"),
-  registerValidation,
-  register,
-);
+// Routes protégées
 router.get("/me", protect, getMe);
+router.put("/profile", protect, updateProfile);
+router.put("/password", protect, changePassword);
 router.post(
   "/invite",
   protect,

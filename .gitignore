@@ -9,7 +9,11 @@ yarn-error.log
 
 # Build output
 /dist
-/build
+build/
+**/build/
+
+# Uploads (user data)
+server/uploads/
 
 # IDE
 .vscode/

@@ -10,6 +10,8 @@ export interface IPersonne extends Document {
   dateDeces?: Date;
   lieuDeces?: string;
   causeDeces?: string;
+  pereExterne?: string; // Nom du père s'il n'est pas dans la famille
+  mereExterne?: string; // Nom de la mère si elle n'est pas dans la famille
   profession?: string;
   professions?: Array<{
     intitule: string;
@@ -138,6 +140,8 @@ const personneSchema = new Schema<IPersonne>(
     dateDeces: Date,
     lieuDeces: String,
     causeDeces: String,
+    pereExterne: { type: String, trim: true },
+    mereExterne: { type: String, trim: true },
     profession: String,
     professions: [professionSchema],
     genre: { type: String, enum: ['homme', 'femme', 'autre'] },
